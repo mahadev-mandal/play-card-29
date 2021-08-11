@@ -10,7 +10,7 @@ import Paper from '@material-ui/core/Paper';
 import { useFormik } from 'formik'
 import { cardSchema } from './validationSchema';
 import cancel from './cancel.png'
-import { Button, Input, TextField } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 
 const StyledTableCell = withStyles((theme) => ({
     head: {
@@ -19,7 +19,7 @@ const StyledTableCell = withStyles((theme) => ({
     },
     body: {
         fontSize: '',
-        padding: 10,
+        padding: 17,
 
     },
 }))(TableCell);
@@ -44,28 +44,25 @@ const useStyles = makeStyles({
         fontSize: 16,
         background: 'transparent',
         textAlign: 'center',
-        textTransform:'capitalize'
+        textTransform: 'capitalize'
     },
 });
 
-const initialValues = {}
-//push value to object
-for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-        initialValues['name' + i + j] = ''
-    }
-}
-
-const id = ['0', '1', '2', '3'];
-
-function TableComp({ onClick, disabled, names, onChange }) {
-
+function TableComp({ onClick, disabled, rows, names, columns }) {
     const classes = useStyles();
-
-    const [total0, setName0] = useState(0)
-    const [total1, setName1] = useState(0)
-    const [total2, setName2] = useState(0)
-    const [total3, setName3] = useState(0)
+    const [total0, setTotal0] = useState(0)
+    const [total1, setTotal1] = useState(0)
+    const [total2, setTotal2] = useState(0)
+    const [total3, setTotal3] = useState(0)
+    const [nmes, setNames] = useState( names )
+    
+    const initialValues = {}
+    //push value to object
+    rows.map((row) =>
+        columns.map((col) =>
+            initialValues['name' + row + col] = ''
+        )
+    )
 
     const { handleChange, values } = useFormik({
         initialValues: initialValues,
@@ -74,11 +71,15 @@ function TableComp({ onClick, disabled, names, onChange }) {
 
         }
     })
-    const checkIfCircle = (i, j) => {
-        if (document.getElementById('name' + j + i).style.border === '1px solid red') {
-            return -values['name' + j + i]
+    const checkIfCircle = (row, col) => {
+        if (document.getElementById('name' + row + col).style.border === '1px solid red') {
+            return -values['name' + row + col]
         } else {
-            return values['name' + j + i]
+            if (values['name' + row + col] === '') {
+                return 0
+            } else {
+                return values['name' + row + col]
+            }
         }
     }
     // sum all values in each name field
@@ -87,33 +88,32 @@ function TableComp({ onClick, disabled, names, onChange }) {
         var b = 0;
         var c = 0;
         var d = 0;
-        for (let i = 0; i <= 3; i++) {
-            for (let j = 0; j <= 3; j++) {
-                if (i === 0) {
-                    a += checkIfCircle(i, j)
-                } else if (i === 1) {
-                    b += checkIfCircle(i, j)
-                } else if (i === 2) {
-                    c += checkIfCircle(i, j)
-
-                } else if (i === 3) {
-                    d += checkIfCircle(i, j)
+        for (let row = 0; row < rows.length; row++) {
+            for (let col = 0; col < columns.length; col++) {
+                if (col === 0) {
+                    a += checkIfCircle(rows[row], columns[col])
+                } else if (col === 1) {
+                    b += checkIfCircle(rows[row], columns[col])
+                } else if (col === 2) {
+                    c += checkIfCircle(rows[row], columns[col])
+                } else if (col === 3) {
+                    d += checkIfCircle(rows[row], columns[col])
                 }
             }
         }
-        setName0(a)
-        setName1(b)
-        setName2(c)
-        setName3(d)
+        setTotal0(a)
+        setTotal1(b)
+        setTotal2(c)
+        setTotal3(d)
     }
     // Circle the last not empty value in table
     const handleClick = (event) => {
-        let i = parseInt(event.target.id)
-        for (let j = 3; j >= 0; j--) {
-            if (values['name' + j + i] !== '') {
-                document.getElementById('name' + j + i).style.border = '1px solid red';
-                document.getElementById('name' + j + i).style.borderRadius = '50%';
-                document.getElementById('name' + j + i).disabled = 'disabled';
+        let col = parseInt(event.target.id)
+        for (let row = rows.length - 1; row >= 0; row--) {
+            if (values['name' + rows[row] + col] !== '') {
+                document.getElementById('name' + rows[row] + col).style.border = '1px solid red';
+                document.getElementById('name' + rows[row] + col).style.borderRadius = '50%';
+                document.getElementById('name' + rows[row] + col).disabled = 'disabled';
                 sum()
                 break;
             }
@@ -123,28 +123,38 @@ function TableComp({ onClick, disabled, names, onChange }) {
     useEffect(() => {
         sum()
     })
-
+    useEffect(()=>{
+        window.scrollTo(0,document.body.scrollHeight)
+    },[])
+    const handleNameChange = (event, index) => {
+        if (index === 0) {
+            setNames({ ...nmes, name0: event.target.value })
+        } else if (index === 1) {
+            setNames({ ...nmes, name1: event.target.value })
+        } else if (index === 2) {
+            setNames({ ...nmes, name2: event.target.value })
+        } else if (index === 3) {
+            setNames({ ...nmes, name3: event.target.value })
+        }
+    }
     return (
-        <>
-            <TableContainer component={Paper}
-                style={disabled ? { pointerEvents: 'none', opacity: 0.9 } : {}}
-            >
+        <div style={disabled ? { pointerEvents: 'none', opacity: 0.9 } : {}}>
+            <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="customized table">
                     <TableHead >
                         <TableRow>
                             <StyledTableCell >s.n</StyledTableCell>
-                            {id.map((n, index) =>
+                            {columns.map((col, index) =>
                                 <StyledTableCell
                                     align='center'
                                     style={{ padding: 8 }}
-                                    key={n}
+                                    key={col}
                                 >
                                     <input type='text'
                                         style={{ color: 'white', width: '100%', margin: 0, }}
                                         className={classes.input}
-                                        value={names['name' + index]}
-                                        onChange={(event) => { onChange(event.target.value, index) }}
-
+                                        value={nmes['name' + index]}
+                                        onChange={(event) => { handleNameChange(event, index) }}
                                     />
                                 </StyledTableCell>
                             )}
@@ -153,9 +163,9 @@ function TableComp({ onClick, disabled, names, onChange }) {
                     <TableBody>
                         <StyledTableRow>
                             <StyledTableCell></StyledTableCell>
-                            {id.map((id) =>
-                                <StyledTableCell key={id} >
-                                    <img id={id}
+                            {columns.map((column) =>
+                                <StyledTableCell key={column} >
+                                    <img id={column}
                                         onClick={handleClick} src={cancel}
                                         style={{ width: 7, display: 'block', margin: 'auto' }}
                                         alt="cross icon"
@@ -163,18 +173,18 @@ function TableComp({ onClick, disabled, names, onChange }) {
                                 </StyledTableCell>
                             )}
                         </StyledTableRow>
-                        {id.map((id0, index0) => (
-                            <StyledTableRow key={id0}>
+                        {rows.map((row, index) => (
+                            <StyledTableRow key={row}>
                                 <StyledTableCell >
-                                    {index0 + 1}.
+                                    {index + 1}.
                                 </StyledTableCell>
-                                {id.map((id1, index1) => (
-                                    <StyledTableCell key={id1} scope="row" align='center'>
+                                {columns.map((column) => (
+                                    <StyledTableCell key={column} scope="row" align='center'>
                                         <input type="number"
-                                            id={'name' + index0 + index1}
+                                            id={'name' + row + column}
                                             onChange={handleChange}
                                             className={classes.input}
-                                            value={values['name' + index0 + index1]}
+                                            value={values['name' + row + column]}
                                         />
                                     </StyledTableCell>
                                 ))}
@@ -201,11 +211,11 @@ function TableComp({ onClick, disabled, names, onChange }) {
             <Button variant='contained'
                 color='secondary'
                 style={{ margin: 15 }}
-                onClick={() => { onClick() }}
+                onClick={() => { onClick(nmes) }}
             >
                 Add Table
             </Button>
-        </>
+        </div>
     );
 }
 
