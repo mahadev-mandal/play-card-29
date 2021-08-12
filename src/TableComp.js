@@ -144,7 +144,7 @@ function TableComp({ onClick, disabled, rows, names, columns }) {
         }
     }
     return (
-        <div style={disabled ? { pointerEvents: 'none', opacity: 0.9 } : { height: '94vh' }}>
+        <div style={disabled ? { pointerEvents: 'none', opacity: 0.9 } : { height: '90vh' }}>
             <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="customized table">
                     <TableHead >
