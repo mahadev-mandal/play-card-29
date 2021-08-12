@@ -10,7 +10,8 @@ import Paper from '@material-ui/core/Paper';
 import { useFormik } from 'formik'
 import { cardSchema } from './validationSchema';
 import cancel from './cancel.png'
-import { Button } from '@material-ui/core';
+import { Fab } from '@material-ui/core';
+
 
 const StyledTableCell = withStyles((theme) => ({
     head: {
@@ -18,8 +19,8 @@ const StyledTableCell = withStyles((theme) => ({
         color: theme.palette.common.white,
     },
     body: {
-        fontSize: '',
-        padding: 17,
+        fontSize: 20,
+        padding: 10,
 
     },
 }))(TableCell);
@@ -41,7 +42,7 @@ const useStyles = makeStyles({
         border: 'none',
         outline: 'none',
         width: '70%',
-        fontSize: 16,
+        fontSize: 22,
         background: 'transparent',
         textAlign: 'center',
         textTransform: 'capitalize'
@@ -54,8 +55,8 @@ function TableComp({ onClick, disabled, rows, names, columns }) {
     const [total1, setTotal1] = useState(0)
     const [total2, setTotal2] = useState(0)
     const [total3, setTotal3] = useState(0)
-    const [nmes, setNames] = useState( names )
-    
+    const [nmes, setNames] = useState(names)
+
     const initialValues = {}
     //push value to object
     rows.map((row) =>
@@ -72,46 +73,51 @@ function TableComp({ onClick, disabled, rows, names, columns }) {
         }
     })
     const checkIfCircle = (row, col) => {
-        if (document.getElementById('name' + row + col).style.border === '1px solid red') {
-            return -values['name' + row + col]
+        if (document.getElementById('name' + row + col).style.border === '2px solid red') {
+            return (-values['name' + row + col]).toFixed(1).toString().split('.')
         } else {
             if (values['name' + row + col] === '') {
-                return 0
+                return (0).toFixed(1).toString().split('.')
             } else {
-                return values['name' + row + col]
+                return (values['name' + row + col]).toFixed(1).toString().split('.')
             }
         }
     }
-    // sum all values in each name field
+    //sum all values in each name field
     const sum = () => {
-        var a = 0;
-        var b = 0;
-        var c = 0;
-        var d = 0;
-        for (let row = 0; row < rows.length; row++) {
-            for (let col = 0; col < columns.length; col++) {
-                if (col === 0) {
-                    a += checkIfCircle(rows[row], columns[col])
-                } else if (col === 1) {
-                    b += checkIfCircle(rows[row], columns[col])
-                } else if (col === 2) {
-                    c += checkIfCircle(rows[row], columns[col])
-                } else if (col === 3) {
-                    d += checkIfCircle(rows[row], columns[col])
-                }
+        //arrMatrix = [[['',''],...5],...4]
+        var arrMatrix = columns.map((col) =>
+            rows.map((row) =>
+                checkIfCircle(row, col)
+            )
+
+        )
+        //totalArr = ['','','','']
+        var totalArr = arrMatrix.map((col) => {
+            var beforeDot = 0;
+            var afterDot = 0;
+            col.map((row) => {
+                beforeDot += parseInt((row[0]))
+                afterDot += parseInt((row[1]))
+                return 0
+            })
+            if (afterDot > 9) {
+                beforeDot += 1;
+                afterDot -= 10
             }
-        }
-        setTotal0(a)
-        setTotal1(b)
-        setTotal2(c)
-        setTotal3(d)
+            return parseFloat(beforeDot.toString() + '.' + afterDot.toString())
+        })
+        setTotal0(totalArr[0])
+        setTotal1(totalArr[1])
+        setTotal2(totalArr[2])
+        setTotal3(totalArr[3])
     }
     // Circle the last not empty value in table
     const handleClick = (event) => {
         let col = parseInt(event.target.id)
         for (let row = rows.length - 1; row >= 0; row--) {
             if (values['name' + rows[row] + col] !== '') {
-                document.getElementById('name' + rows[row] + col).style.border = '1px solid red';
+                document.getElementById('name' + rows[row] + col).style.border = '2px solid red';
                 document.getElementById('name' + rows[row] + col).style.borderRadius = '50%';
                 document.getElementById('name' + rows[row] + col).disabled = 'disabled';
                 sum()
@@ -123,9 +129,9 @@ function TableComp({ onClick, disabled, rows, names, columns }) {
     useEffect(() => {
         sum()
     })
-    useEffect(()=>{
-        window.scrollTo(0,document.body.scrollHeight)
-    },[])
+    useEffect(() => {
+        window.scrollTo(0, document.body.scrollHeight)
+    }, [])
     const handleNameChange = (event, index) => {
         if (index === 0) {
             setNames({ ...nmes, name0: event.target.value })
@@ -138,7 +144,7 @@ function TableComp({ onClick, disabled, rows, names, columns }) {
         }
     }
     return (
-        <div style={disabled ? { pointerEvents: 'none', opacity: 0.9 } : {}}>
+        <div style={disabled ? { pointerEvents: 'none', opacity: 0.9 } : { height: '97vh' }}>
             <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="customized table">
                     <TableHead >
@@ -151,7 +157,7 @@ function TableComp({ onClick, disabled, rows, names, columns }) {
                                     key={col}
                                 >
                                     <input type='text'
-                                        style={{ color: 'white', width: '100%', margin: 0, }}
+                                        style={{ color: 'white', width: '100%', margin: 0, fontSize: 15, }}
                                         className={classes.input}
                                         value={nmes['name' + index]}
                                         onChange={(event) => { handleNameChange(event, index) }}
@@ -208,13 +214,14 @@ function TableComp({ onClick, disabled, rows, names, columns }) {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Button variant='contained'
+            <Fab variant="extended"
+                size='small'
                 color='secondary'
-                style={{ margin: 15 }}
+                style={{ margin: 10 }}
                 onClick={() => { onClick(nmes) }}
             >
                 Add Table
-            </Button>
+            </Fab>
         </div>
     );
 }

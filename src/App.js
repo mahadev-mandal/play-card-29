@@ -1,6 +1,7 @@
-import { Typography } from '@material-ui/core'
+import { Grid, Typography } from '@material-ui/core'
 import React, { useState } from 'react'
 import TableComp from './TableComp'
+
 
 function App() {
   const [rows, setRows] = useState([['0', '1', '2', '3', '4']]);
@@ -12,7 +13,7 @@ function App() {
     name2: 'C',
     name3: 'D',
   }])
-  
+
   const addTable = (nmes) => {
     const arr1 = []
     const arr2 = []
@@ -27,25 +28,30 @@ function App() {
     setNames([...names, nmes]);
     setTables([...tables, tables.length + 1]);
   }
-  
+
   return (
-    <div>
-      <Typography variant='h5'
-        component='h1'
-        style={{ textAlign: 'center' }}
-      >
-        Play Cards
-      </Typography>
-      {tables.map((t, i) => (
-        <TableComp key={t}
-          rows={rows[i]}
-          columns={columns[i]}
-          disabled={t < tables.length ? true : false}
-          onClick={addTable}
-          names={names[i]}
-        />
-      ))}
-    </div>
+
+    <Grid container justifyContent='center'>
+      <Grid item sm={7} md={6} lg={5} xl={4}>
+        <Typography variant='h5'
+          component='h1'
+          style={{ textAlign: 'center', padding: 10, background: 'green', color: 'white' }}
+        >
+          Play Cards
+        </Typography>
+
+        {tables.map((t, i) => (
+          <TableComp key={t}
+            rows={rows[i]}
+            columns={columns[i]}
+            disabled={t < tables.length ? true : false}
+            onClick={addTable}
+            names={names[i]}
+          />
+        ))}
+
+      </Grid>
+    </Grid>
   )
 }
 
